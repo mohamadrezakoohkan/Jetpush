@@ -56,8 +56,18 @@ SCHEME="mySample"
 CONFIGURATION="Release" # Or Debug, ...
 EXPORT_OPTIONS="ExportOptions.plist" # You can name your export-options whatever you like
 ```
-**9.** Run jetpush in terminal to see the magic 
-```bash  
+**9.** Generate CI configuration:
+  - If your app hosted by `GitLab` run:
+  ```bash
+  jetpush gitlab
+  ```
+  - Else if your app hosted by `GitHub` run:
+  ```bash
+  jetpush github
+  ```
+
+**10.** Run jetpush in terminal to see the magic 
+```bash
 jetpush
 ```
 
