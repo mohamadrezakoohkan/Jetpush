@@ -25,10 +25,12 @@ Jetpush export-configurations reads from known `ExportOptions.plist` from `jetpu
        cd Jetpush
 
 **3.** Install jetpush:  
+
+> This line will create an executable refrence in /usr/local/bin, Then you can directly call jetpush everywhere
    
        ./jetpush install 
 
-       > This line will create an executable refrence in /usr/local/bin, Then you can directly call jetpush everywhere
+
 
 **4.** Go to your xcode project directory:  
    
