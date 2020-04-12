@@ -25,7 +25,7 @@ Jetpush export-configurations reads from known `ExportOptions.plist` from `jetpu
 > This line will create an executable refrence in /usr/local/bin, Then you can directly call jetpush everywhere
 4. Go to your xcode project directory:  
    
-    cd mySample
+       cd mySample
 
 5. Open xcode:  
     open mySample.xcworkspace
