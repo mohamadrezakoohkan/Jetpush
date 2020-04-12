@@ -18,49 +18,49 @@ Jetpush export-configurations reads from known `ExportOptions.plist` from `jetpu
 ## Installation
 **1.** Clone the repo:  
 
-       https://github.com/mohamadrezakoohkan/Jetpush
+    https://github.com/mohamadrezakoohkan/Jetpush
 
 **2.** Change directory to `Jetpush`:  
    
-       cd Jetpush
+    cd Jetpush
 
 **3.** Install jetpush:  
 
 > This line will create an executable refrence in /usr/local/bin, Then you can directly call jetpush everywhere
    
-       ./jetpush install 
+    ./jetpush install 
 
 
 
 **4.** Go to your xcode project directory:  
    
-       cd mySample
+    cd mySample
 
 **5.** Open xcode:  
  
-       open mySample.xcworkspace
+    open mySample.xcworkspace
 
 **6.** In the project setting select your target, then open Signing & Capabilities And turn on: 
     
-       `Automatically manage signing`
+    `Automatically manage signing`
 
 **7.** Back too `Terminal` and initialize `jetpush-config.env` using:  
 
-       jetpush init
+    jetpush init
 
 **8.** Open `jetpush-config.env` and fill the configurations as need.
    
-       > If you have xcworkspace just include WORKSPACE  
+> If you have xcworkspace just include WORKSPACE  
 
-       PROJECT=""
-       WORKSPACE="mySample.xcworkspace"
-       SCHEME="mySample"
-       CONFIGURATION="Release" # Or Debug, ...
-       EXPORT_OPTIONS="ExportOptions.plist" # You can name your export-options whatever you like
+    PROJECT=""
+    WORKSPACE="mySample.xcworkspace"
+    SCHEME="mySample"
+    CONFIGURATION="Release" # Or Debug, ...
+    EXPORT_OPTIONS="ExportOptions.plist" # You can name your export-options whatever you like
 
 **9.** Run jetpush in terminal to see the magic 
     
-       jetpush
+    jetpush
 
 ## Contact
 Follow and contact me on [Instagram](https://www.instagram.com/mohamadreza.codes/),  [Github](https://github.com/mohamadrezakoohkan), [LinkedIn](https://www.linkedin.com/in/mohammad-reza-koohkan-558306160/) and [stack overflow](https://stackoverflow.com/users/9706268/mohamad-reza-koohkan?tab=profile). If you find an issue [open a ticket](https://github.com/mohamadrezakoohkan/Jetpush/issues/new). You can send me email at mohamad_koohkan@icloud.com .
