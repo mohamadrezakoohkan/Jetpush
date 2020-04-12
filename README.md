@@ -46,16 +46,15 @@ Jetpush export-configurations reads from known `ExportOptions.plist` from `jetpu
 
        jetpush init
 
-6. Open `jetpush-config.env` and fill the configurations as need.  
-   
+6. Open `jetpush-config.env` and fill the configurations as need.
+       > If you have xcworkspace just include WORKSPACE  
        PROJECT=""
        WORKSPACE="mySample.xcworkspace"
        SCHEME="mySample"
        CONFIGURATION="Release" # Or Debug, ...
        EXPORT_OPTIONS="ExportOptions.plist" # You can name your export-options whatever you like
-> If you have xcworkspace just include WORKSPACE
 
-1. Run jetpush in terminal to see the magic 
+7. Run jetpush in terminal to see the magic 
     
        jetpush
 
