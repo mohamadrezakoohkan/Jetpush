@@ -48,6 +48,7 @@ Jetpush export-configurations reads from known `ExportOptions.plist` from `jetpu
 
 6. Open `jetpush-config.env` and fill the configurations as need.
        > If you have xcworkspace just include WORKSPACE  
+       
        PROJECT=""
        WORKSPACE="mySample.xcworkspace"
        SCHEME="mySample"
