@@ -1,0 +1,201 @@
+#!/bin/bash
+localBin="/usr/local/bin"
+configName="jetpush-config.env"
+githubCD="github-cd.yml"
+gitlabCD=".gitlab-ci.yml"
+green="`tput setaf 2`"
+cyan="`tput setaf 6`"
+red="`tput setaf 196`"
+bold="`tput bold`"
+norm="`tput sgr0`"
+_stepper=0
+
+step() {
+    _stepper=$((_stepper + 1))
+    echo ${cyan}${bold}[${_stepper}]${norm} ${green}$1${norm};
+}
+
+out() {
+	echo ${norm}${green}$1${norm};
+}
+
+error() {
+	echo ${red}${bold}$1
+	exit
+}
+
+emptyConfig() { 
+	if [[ -z $2 ]]
+	then 
+	error "$1 is empty try to include in jetpush-config.env"
+	fi
+}
+
+# Process input arguments
+
+
+if [[ $1 = "install" ]]
+then
+	if [[ -e "jetpush" ]]
+	then
+		if [[ -e $localBin  ]]
+		then
+		> $localBin/jetpush
+		echo "#!/bin/bash" >> $localBin/jetpush
+		echo . "$(pwd)/jetpush" >> $localBin/jetpush
+		chmod +x $localBin/jetpush
+		out "Jetpush installed at $localBin/jetpush"
+		exit
+		else
+		error "Could not find $localBin"
+		fi
+	else
+	error "There is not such executable named jetpush in $(pwd)"
+	fi
+# Initialize empty jetpush-config.env file
+elif [[ $1 = "init" ]]
+then
+> $configName
+echo "# Please define only one between PROJECT or WORKSPACE" >> $configName
+echo "# PROJECT = example.xcodeproj" >> $configName
+echo "# WORKSPACE = example.xcworkspace" >> $configName
+echo "PROJECT=''" >> $configName
+echo "WORKSPACE=''" >> $configName
+echo "SCHEME=''" >> $configName
+echo "CONFIGURATION='Release'" >> $configName
+echo "EXPORT_OPTIONS='ExportOptions.plist'" >> $configName
+step "Empty $configName created at path:"
+echo $(pwd)/$configName
+step "Press Enter to open"
+read key
+open $configName
+exit
+# Create github-cd configuration
+elif [[ $1 = "github" ]]
+then
+WORKFLOWS=.github/workflows
+mkdir -p -- "$WORKFLOWS"
+> $WORKFLOWS/$githubCD
+echo "
+name: Upload
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  Upload:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with: 
+        name: Assets
+        path: build/ipa/
+" >> $WORKFLOWS/$githubCD
+out "Github upload artifact workflow created at path:"
+echo $(pwd)/$WORKFLOWS/$githubCD
+exit
+elif [[ $1 = "gitlab" ]]
+then
+> $gitlabCD
+echo "stages:
+  - release
+release:
+  stage: release
+  script:
+    - ls
+  artifacts:
+    paths:
+    - build/ipa/
+" >> $gitlabCD
+out "Gitlab upload artifact pipeline created at path:"
+echo $(pwd)/$gitlabCD
+exit
+elif [[ $1 != "" ]]
+then
+error "$1: command notfound"
+# Run project with importing jetpush-config.env file
+else
+	# Check config file is exist or not
+	if [[ -e $configName ]]
+	then
+	. $(pwd)/$configName
+	else
+	error "Could not find $configName in $(pwd) try running jetpush init first"
+	fi
+fi
+
+BUILD_PATH="build"
+ARCHIVE_PATH="$BUILD_PATH/archive/$SCHEME.xcarchive"
+EXPORT_PATH="$BUILD_PATH/ipa"
+ORIGIN=$(git config --get remote.origin.url)
+VERSION=""
+BUILD_NUMBER=""
+
+# Start reading config file
+
+step "Reading project configurations from jetpush-config.env"
+
+# Check wether enviroment variables is empty or not
+
+emptyConfig $SCHEME SCHEME
+emptyConfig $CONFIGURATION CONFIGURATION
+emptyConfig $EXPORT_OPTIONS EXPORT_OPTIONS
+
+# Archiving project from defined project or workspace
+
+if [[ -n $PROJECT ]]
+then
+step "Archiving project $PROJECT from scheme $SCHEME"
+xcodebuild archive -quiet \
+	-project $PROJECT \
+	-scheme $SCHEME \
+	-configuration $CONFIGURATION \
+	-archivePath $ARCHIVE_PATH
+elif [[ -n $WORKSPACE ]]
+then
+step "Archiving workspace $WORKSPACE from scheme $SCHEME"
+xcodebuild archive -quiet \
+	-workspace $WORKSPACE \
+	-scheme $SCHEME \
+	-configuration $CONFIGURATION \
+	-archivePath $ARCHIVE_PATH
+else
+error "PROJECT or WORKSPACE is empty try to includ jetpush-config.env in root of project directory"
+fi
+step "Archive located in $ARCHIVE_PATH"
+
+# Logging application version from archived file
+
+VERSION=$(/usr/libexec/PlistBuddy \
+	$ARCHIVE_PATH/Info.plist \
+	-c 'print ":ApplicationProperties:CFBundleShortVersionString"')
+step "App version $VERSION"
+
+# Logging application build number from archived file
+
+BUILD_NUMBER=$(/usr/libexec/PlistBuddy \
+	$ARCHIVE_PATH/Info.plist \
+	-c 'print ":ApplicationProperties:CFBundleVersion"')	
+step "App build number $BUILD_NUMBER"
+
+# Exporting ipa from archived file and export options property list
+
+step "Exporting ipa from $(pwd)/$ARCHIVE_PATH"
+xcodebuild \
+	-allowProvisioningUpdates \
+	-exportArchive \
+	-archivePath $ARCHIVE_PATH \
+	-exportPath $EXPORT_PATH \
+	-exportOptionsPlist $EXPORT_OPTIONS
+	
+step "IPA located in $EXPORT_PATH"
+
+# Pushing release to CI-machine
+
+step "Uploading IPA as artifact to git"
+git add . > /dev/null
+git commit -m "$CONFIGURATION $VERSION uploaded" > /dev/null
+git push origin HEAD
